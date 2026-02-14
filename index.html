@@ -1,1 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VerifyTool HCRP – Roblox → Discord Verifizierung</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background: #0d1117; color: #c9d1d9; margin: 0; }
+    h1, h2 { color: #58a6ff; }
+    #consent { background: #161b22; padding: 30px; border-radius: 12px; max-width: 600px; margin: 40px auto; border: 1px solid #30363d; }
+    button { padding: 12px 28px; font-size: 18px; margin: 12px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; }
+    #accept { background: #238636; color: white; }
+    #decline { background: #da3633; color: white; }
+    #loginBtn { background: #00b8ff; color: white; display: none; }
+    #main { max-width: 700px; margin: 0 auto; }
+    #status { margin: 30px 0; font-size: 18px; line-height: 1.6; }
+    .links { margin: 40px 0; font-size: 16px; }
+    .links a { color: #58a6ff; text-decoration: none; margin: 0 15px; }
+    .links a:hover { text-decoration: underline; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
 
+  <div id="consent">
+    <h2>Cookie-Zustimmung erforderlich</h2>
+    <p>Diese Seite verwendet <strong>nur technisch notwendige Cookies</strong> für den Roblox-Login (kein Tracking, keine Werbung, keine dauerhafte Speicherung deiner Daten).<br>
+    Wir sehen deine Daten nicht, loggen nicht ein und veröffentlichen nichts.<br><br>
+    <a href="https://docs.google.com/document/d/DEINE_DATENSCHUTZ_GOOGLE_DOCS_ID_HIER/view" target="_blank">Datenschutzhinweise</a> • 
+    <a href="https://docs.google.com/document/d/DEINE_NUTZUNGSBEDINGUNGEN_GOOGLE_DOCS_ID_HIER/view" target="_blank">Nutzungsbedingungen</a></p>
+    <button id="accept">Akzeptieren & fortfahren</button>
+    <button id="decline">Ablehnen</button>
+  </div>
+
+  <div id="main" class="hidden">
+    <h1>Discord-Verifizierung für HCRP</h1>
+    <p>Melde dich mit deinem Roblox-Account an, um verifiziert zu werden.<br>
+    Danach kannst du die Rolle „Verify“ (manuell) erhalten.</p>
+    
+    <button id="loginBtn">Mit Roblox anmelden</button>
+    
+    <div id="status"></div>
+    
+    <div class="links">
+      <a href="https://docs.google.com/document/d/DEINE_DATENSCHUTZ_GOOGLE_DOCS_ID_HIER/view" target="_blank">Datenschutzhinweise</a> • 
+      <a href="https://docs.google.com/document/d/DEINE_NUTZUNGSBEDINGUNGEN_GOOGLE_DOCS_ID_HIER/view" target="_blank">Nutzungsbedingungen</a>
+    </div>
+  </div>
+
+  <script>
+    const consentDiv = document.getElementById('consent');
+    const mainDiv = document.getElementById('main');
+    const statusDiv = document.getElementById('status');
+    const loginBtn = document.getElementById('loginBtn');
+
+    // === Deine Roblox OAuth-Daten ===
+    const CLIENT_ID = "DEINE_CLIENT_ID_HIER_EINFÜGEN";  // ← HIER EINFÜGEN !!!
+    const REDIRECT_URI = window.location.origin + window.location.pathname;
+    const SCOPE = "openid profile";
+
+    // === Cookie Consent ===
+    function hasConsent() {
+      return localStorage.getItem("cookieConsent") === "accepted";
+    }
+
+    function acceptConsent() {
+      localStorage.setItem("cookieConsent", "accepted");
+      consentDiv.classList.add('hidden');
+      mainDiv.classList.remove('hidden');
+    }
+
+    function declineConsent() {
+      statusDiv.innerHTML = "<p style='color:#f85149;'>Du hast abgelehnt – Login nicht möglich.</p>";
+      consentDiv.innerHTML = "<p>Danke. Du kannst die Seite schließen.</p>";
+    }
+
+    document.getElementById('accept').onclick = acceptConsent;
+    document.getElementById('decline').onclick = declineConsent;
+
+    if (hasConsent()) {
+      acceptConsent();
+    }
+
+    // === Roblox Login ===
+    loginBtn.onclick = () => {
+      const state = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem("oauth_state", state);
+
+      const authUrl = `https://apis.roblox.com/oauth/v1/authorize?` +
+        `client_id=${CLIENT_ID}&` +
+        `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
+        `response_type=code&` +
+        `scope=${encodeURIComponent(SCOPE)}&` +
+        `state=${state}`;
+
+      window.location.href = authUrl;
+    };
+
+    // === Nach Redirect ===
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+    const returnedState = urlParams.get("state");
+
+    if (code && returnedState) {
+      if (returnedState !== localStorage.getItem("oauth_state")) {
+        statusDiv.innerHTML = "<p style='color:#f85149;'>Sicherheitsfehler – versuche es erneut.</p>";
+      } else {
+        statusDiv.innerHTML = `
+          <h2 style="color:#3fb950;">Login erfolgreich!</h2>
+          <p>Dein Roblox-Account ist verbunden.<br>
+          <strong>Nächster Schritt für die Rolle „Verify“ (ID: 1470004099129933829):</strong></p>
+          <ol style="text-align:left; max-width:500px; margin:20px auto; line-height:1.8;">
+            <li>Merke dir deinen Roblox-Username (steht normalerweise in Roblox oder du siehst ihn in der Browser-Konsole: F12 → Network → userinfo)</li>
+            <li>Gehe in unseren Discord-Server (ID: 1465446195530043608)</li>
+            <li>Schreibe in #verify oder per DM an einen Admin:<br>
+                <code>!verify Roblox: DeinUsername Discord: DeinName#1234</code></li>
+            <li>Ein Admin vergibt dir dann die Rolle manuell.</li>
+          </ol>
+          <p><strong>Hinweis:</strong> Keine automatische Rollenvergabe (kein Bot-Backend). Deine Daten bleiben nur temporär im Browser – nichts wird gespeichert.</p>
+        `;
+      }
+
+      // URL säubern
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  </script>
+
+</body>
+</html>
