@@ -1,70 +1,34 @@
+HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HCRP Roblox Verify – Username eingeben</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #0d1117; color: #c9d1d9; margin: 0; }
-    h1 { color: #58a6ff; }
-    input, button { padding: 12px; font-size: 18px; margin: 15px; border-radius: 8px; border: none; }
-    input { width: 320px; background: #21262d; color: white; }
-    button { background: #238636; color: white; cursor: pointer; }
-    #status { margin-top: 30px; font-size: 20px; line-height: 1.6; }
-    .links { margin: 40px 0; font-size: 16px; }
-    .links a { color: #58a6ff; text-decoration: none; margin: 0 15px; }
-    .links a:hover { text-decoration: underline; }
-    .small { font-size: 14px; color: #8b949e; }
-  </style>
+<meta charset="UTF-8">
+<title>Discord Verifizierung</title>
+<style>
+body {background:#1e1e1e; color:white; font-family:Arial; text-align:center; padding-top:60px;}
+input, button {width:260px; padding:10px; margin:6px; border:none; border-radius:6px;}
+button {background:#5865F2; color:white; cursor:pointer;}
+</style>
 </head>
 <body>
-
-  <h1>HCRP Discord Verifizierung</h1>
-  <p>Gib einfach deinen <strong>genauen Roblox-Username</strong> ein.<br>
-  Danach wird er als dein Nickname im Server gesetzt und du bekommst die Verify-Rolle (manuell oder per Bot).</p>
-
-  <input type="text" id="username" placeholder="Dein Roblox-Username (z. B. CoolPlayer123)" />
-  <br>
-  <button onclick="verify()">Verifizieren</button>
-
-  <div id="status"></div>
-
-  <div class="links">
-    <a href="https://docs.google.com/document/d/1vZNR8X_3n6bAYOLRoI_2pmNFeIovOsm_9O_xfQv8_gk/edit?usp=sharing" target="_blank">Datenschutzhinweise</a> •
-    <a href="https://docs.google.com/document/d/18bUhXPPvTXINhVh6XHRc7Cjz0HwWqN3qhzkAH13AsNc/edit?usp=sharing" target="_blank">Nutzungsbedingungen</a>
-  </div>
-
-  <p class="small">Hinweis: Die Dokumente müssen öffentlich lesbar sein („Jeder mit dem Link“ → Zuschauer). Bei Problemen: Erstelle stattdessen separate .html-Dateien im Repository.</p>
-
-  <script>
-    function verify() {
-      const username = document.getElementById('username').value.trim();
-      const status = document.getElementById('status');
-
-      if (!username) {
-        status.innerHTML = '<p style="color:#f85149;">Bitte gib deinen Roblox-Username ein!</p>';
-        return;
-      }
-
-      if (username.length < 3 || username.length > 20) {
-        status.innerHTML = '<p style="color:#f85149;">Der Username sollte zwischen 3 und 20 Zeichen haben.</p>';
-        return;
-      }
-
-      status.innerHTML = `
-        <p style="color:#3fb950; font-size:22px;">Vielen Dank!</p>
-        <p>Dein angegebener Roblox-Username: <strong>${username}</strong></p>
-        <ol style="text-align:left; max-width:580px; margin:25px auto; line-height:1.8;">
-          <li>Gehe in unseren Discord-Server (ID: 1465446195530043608)</li>
-          <li>Nutze den Verifizierungs-Command (z. B. <code>/verify ${username}</code> oder <code>!verify ${username}</code>)</li>
-          <li>Der Bot (oder ein Admin) setzt deinen Nickname auf <strong>${username}</strong> und vergibt die Verify-Rolle (ID: 1470004099129933829).</li>
-          <li>Fertig – du bist verifiziert!</li>
-        </ol>
-        <p><strong>Schnell zum Server:</strong> <a href="https://discord.com/channels/1465446195530043608" target="_blank" style="color:#58a6ff;">Discord öffnen</a></p>
-        <p style="font-size:14px; color:#8b949e;">Deine Daten werden nicht gespeichert – nur für diese Verifizierung verwendet.</p>
-      `;
-    }
-  </script>
-
+<h2>🔐 Roblox / Discord Verifizierung</h2>
+<input id="name" placeholder="Dein Name"><br>
+<input id="roblox" placeholder="Roblox Username"><br>
+<input id="discordId" placeholder="Discord User ID"><br>
+<button onclick="verify()">Verifizieren</button>
+<script>
+async function verify() {
+    const name = document.getElementById("name").value;
+    const roblox = document.getElementById("roblox").value;
+    const discordId = document.getElementById("discordId").value;
+    const res = await fetch("/verify", {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({name, roblox, discordId})
+    });
+    alert(await res.text());
+}
+</script>
 </body>
 </html>
+"""
